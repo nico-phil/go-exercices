@@ -29,3 +29,5 @@ func main(){
 	fmt.Println("add", addFunc(4, 6))
 
 }
+
+//Function Pointers in Go: Go allows functions to be first-class citizens, meaning they can be assigned to variables, passed as arguments, and returned from other functions.
