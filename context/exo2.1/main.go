@@ -18,18 +18,18 @@ type User struct {
 	ID int64
 }
 
-type userKey string
+type contextKey string
 
 func createContext(id int64) context.Context{
 	user := User{ID: id}
-	key := userKey("user")
+	key := contextKey("user")
 	userContext := context.WithValue(context.Background(), key, user)
 
 	return userContext
 }
 
 func retrieveUser1(ctx context.Context) (User, error){
-	key := userKey("user")
+	key := contextKey("user")
 	user, ok:= ctx.Value(key).(User)
 	if !ok{
 		return User{}, errors.New("user not found")
@@ -39,13 +39,11 @@ func retrieveUser1(ctx context.Context) (User, error){
 		return User{}, errors.New("id cannot be zero")
 	}
 
-	fmt.Println("func 1. user:", user.ID)
-
 	return user, nil
 }
 
 func retrieveUser2(ctx context.Context) (User, error){
-	key := userKey("user")
+	key := contextKey("user")
 	user, ok:= ctx.Value(key).(User)
 	if !ok {
 		return User{}, errors.New("user not found")
@@ -55,7 +53,6 @@ func retrieveUser2(ctx context.Context) (User, error){
 		return User{}, errors.New("id cannot be zero")
 	}
 
-	fmt.Println("func 2. user:", user.ID)
 
 	return user, nil
 }
@@ -65,13 +62,18 @@ func main(){
 	userContext1 := createContext(0)
 	userContext2 := createContext(2)
 
-	_, err := retrieveUser1(userContext1)
+	u1, err := retrieveUser1(userContext1)
 	if err != nil {
 		fmt.Println(err)
 	}
-	_, err = retrieveUser2(userContext2)
+	
+	fmt.Println("func 1. user:", u1.ID)
+
+	u2, err := retrieveUser2(userContext2)
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	fmt.Println("func 2. user:", u2.ID)
 	
 }
