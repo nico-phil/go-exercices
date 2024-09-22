@@ -7,6 +7,13 @@ import (
 	"time"
 )
 
+/**
+	1.2: Canceling Context
+		Create a parent context and a child context using context.WithCancel.
+		Simulate two concurrent processes using goroutines that listen to the context's cancellation signal.
+		Cancel the context after 1 second and observe how both goroutines react.
+**/
+
 func processOne(ctx context.Context, wg *sync.WaitGroup){
 	defer wg.Done()
 	fmt.Println("processOne: listen to context signals...")
