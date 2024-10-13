@@ -92,3 +92,11 @@ The Art of Minimizing GC Pause Time
     within a single GC cycle, the work isn’t parallelized. The reason is that coordinating 
     parallel work would add substantial complexity and potentially diminish the benefits 
     of parallelism
+
+
+
+
+    With this understanding of the GC pacing, it’s clear that Go’s garbage collector 
+    follows a well-thought-out strategy to ensure efficient memory management. 
+    However, memory management in Go is not just about the heap; stack frames play a 
+    crucial role as well.

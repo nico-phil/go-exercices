@@ -1,3 +1,5 @@
+https://bwoff.medium.com/understanding-gos-garbage-collection-415a19cc485c
+
 Garbage collection:
     1. is a form of automatic memory management that aims to recalaims
         memory that are no longer in use by the program. 

@@ -1,0 +1,101 @@
+How Go Handles Stack Frames
+    To understand the role of stack frames in Go’s memory management, we first need to grasp 
+    what stack frames are. In essence, a stack frame is a portion of the call stack, a region 
+    of memory where a program stores the state of a function. Each time a function is invoked, 
+    a new stack frame is allocated. This frame holds local variables, return addresses, and other 
+    function-specific data. Once the function completes execution, the stack frame is deallocated, 
+    effectively freeing up that portion of memory.
+
+
+Dynamic Stack Size
+    Unlike many programming languages that allocate a fixed-size stack for each thread or process, 
+    Go uses a dynamic stack size. This means the Go runtime allocates a small stack for each 
+    goroutine — initially just a few kilobytes — and the stack can grow or shrink as required. 
+    This dynamic approach results in significant memory savings, especially considering Go’s 
+    emphasis on lightweight goroutines, which are much more numerous than typical OS threads
+
+
+    The dynamic nature of the stack size is managed through a mechanism known as stack resizing. 
+    When a function call finds the stack too small to fit a new frame, Go’s runtime intervenes. 
+    It allocates a larger stack, copies the current stack’s contents to the new one, and then 
+    updates the relevant pointers. The old stack is left to be reclaimed by the garbage collector.
+
+
+Stack Shrinking and its Impact on Garbage Collection
+    Go’s runtime also periodically shrinks stacks that have grown larger than necessary. 
+    This process usually happens at the end of a garbage collection cycle. 
+    The runtime scans the stacks for all goroutines, and if a large portion of a stack is 
+    found unused, the runtime reduces its size.
+
+
+    The mechanism of stack shrinking has implications for garbage collection. 
+    Stack shrinking contributes to the efficiency of Go’s GC by reducing the number of 
+    reachable objects. When a stack shrinks, local variables that have fallen out of scope 
+    are discarded, and the memory they occupy becomes unreachable, freeing it up for collection 
+    in the next GC cycle.
+
+
+    However, the process of shrinking and growing stacks incurs overhead, as it involves 
+    copying data and updating pointers. The Go runtime strikes a balance by not shrinking a 
+    stack immediately when space is freed but waiting until a significant amount of stack 
+    space is unused.
+
+    With an understanding of how Go’s runtime dynamically manages stack sizes, and the 
+    implications for garbage collection, it becomes apparent that Go’s memory management 
+    goes beyond just garbage collection. Every aspect of the runtime, including stack frame 
+    management, is designed with efficiency and performance in mind. Up next, we’ll examine 
+    an essential feature related to garbage collection: finalizers.
+
+
+Finalizers in Go
+    Finalizers in Go provide a mechanism to execute cleanup actions or finalizing 
+    operations before the garbage collector reclaims an object. Typically, they are used to 
+    free non-memory resources like file descriptors, network connections, or database 
+    handles that the Go garbage collector cannot reclaim.
+
+
+    In Go, finalizers are associated with a specific object and are invoked when the 
+    garbage collector sees that the object is unreachable, meaning there are no more 
+    references to this object in the program. However, a significant aspect to note is 
+    that Go does not guarantee that a finalizer will run if a program does not terminate 
+    cleanly, such as in the event of an unexpected shutdown or when os.Exit is called. 
+    Therefore, it's recommended to use finalizers only for cleanup actions where failing 
+    to execute isn't critical or can be tolerated.
+
+
+    The runtime package in Go provides a function runtime.SetFinalizer which allows you to 
+    set finalizers for objects. The function signature is as follows:
+
+    func SetFinalizer(obj, finalizer interface{})
+
+    The obj parameter is the object you want to attach the finalizer to, and finalizer is 
+    the function you want to be executed when the object obj is about to be garbage collected
+
+    Here’s an example of how to set a finalizer for an object:
+
+    type File struct {
+    fd      int    // file descriptor
+    name    string // file name
+    }
+
+    func NewFile(fd int, name string) *File {
+        if fd < 0 {
+            return nil
+        }
+        f := File{fd, name}
+        runtime.SetFinalizer(&f, func(f *File) {
+            fmt.Printf("File %s successfully finalized, closing file descriptor...\n", f.name)
+        })
+        return &f
+    }
+
+
+    In the example above, a finalizer is set for each new File object created by the NewFile function. 
+    The finalizer is an anonymous function that prints a message stating that the file has been finalized.
+
+    While finalizers can be a useful tool, they add an additional layer of complexity to 
+    garbage collection and memory management. Due to the non-deterministic nature of 
+    garbage collection and finalizer execution, Go encourages the use of deterministic 
+    resource management, such as Close methods, instead of relying heavily on finalizers 
+    for resource cleanup.
+
