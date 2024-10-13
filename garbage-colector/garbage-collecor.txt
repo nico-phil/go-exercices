@@ -1,0 +1,96 @@
+Garbage collection:
+    1. is a form of automatic memory management that aims to recalaims
+        memory that are no longer in use by the program. 
+    2. it resolves the problem of manual memory mangement, where negligence could lead to
+        potential issue like memory leaks or dangling pointer
+
+
+Understanding Memory Management in Go
+    When a program is executed, it needs to store data and intructions to execute.
+    for thid purpose, it uses computer memory.To maximize efficiency and prevent potential confilcs,
+    memory management comes into play, systemactically allocating and deallocating specific block of 
+    memory.
+
+
+How Go Manages Memory
+    Memory management in go uses both the heap and the stack
+
+
+The Heap and the Stack
+    The stack is a LIFO(last in, first out) data stucture that store local variables and functions calls.
+    Each time a function is invoked, a new stack frame is allocated with all the function's local variable
+    When the function finished executing, its stack frame id deallocated, freeing up the memory for 
+    subsequent use. The task is fast and provide automatic memory management at the expense of size limitations
+    and local scope.
+
+    The heap, on the other hand, is a region of memory used for dynamic memory allocation. 
+    Unlike the stack, the heap has no inherent organization or order, and blocks of memory 
+    can be allocated and deallocated at any time.
+    This flexibility comes at the cost of manual memory management and slower access times. 
+    In Go, memory allocation on the heap is used for data that needs to outlive the scope of 
+    the function making the allocation.
+
+
+Memory Allocation in Go
+    In Go, the size of the heap is managed by the garbage collector (GC). When memory is 
+    allocated, and there’s not enough space in the heap, Go’s runtime will increase the size 
+    of the heap. The GC later frees up heap memory by identifying and discarding objects that 
+    are no longer accessible by the program.
+
+    As for the stack, Go uses a technique called stack segmenting, or split stacks. 
+    Unlike some languages where the stack size must be defined at thread creation, Go starts 
+    with small stacks that can dynamically grow and shrink. Each goroutine starts with a tiny 
+    stack, usually around 2KB, which grows and shrinks as needed.
+
+
+
+Go’s Concurrent, Tri-color, Mark-Sweep Garbage Collector
+    Garbase collector in Go adopts a concurrent, tri-color, mark-sweep approach. 
+    This design allow Go's GC to be non-disruptive to the application's performance while ensuring
+    efficient memory mangement 
+
+    1. Concurrent
+        The term "concurrent" in go signifies that the garbage collection process doesn't stop the
+        execution of the application. Traditional garbage collectors often implement a “stop-the-world” 
+        phase, during which all program execution halts to allow the garbage collector to examine 
+        and reclaim memory. However, such an approach can lead to noticeable pauses in application 
+        performance, which is detrimental for real-time or high-throughput systems.
+
+    
+    2. Tri-color
+        The "tri-color" term refers to the making algorigthm used by Go's GC, which consider objects
+        (or blocks of memory ) in three different states - whites, grey and black
+
+        White objects are those the garbage collecor has not processed.
+        They may or may not be reachable from the roots (the set of objects directly accessible 
+        by the program, like global variables or currently executing function’s local variables).
+
+        Grey objects are those that the garbage collector has discovered to be reachable from 
+        the roots, but their descendants (objects they reference) haven’t been processed yet.
+
+        Black objects are those that the garbage collector has processed entirely — both the object 
+        and its descendants have been discovered and found to be reachable.
+
+        Initially, all objects are white. The garbage collector starts at the roots and colors them grey. 
+        It then proceeds to process each grey object, scanning it for references to other objects. 
+        If a referenced object is white, the garbage collector turns it grey. After processing an object, 
+        the garbage collector colors it black.
+
+        This tri-color algorithm ensures a clear segregation of objects based on their reachability 
+        status, assisting the garbage collector in identifying and reclaiming unreachable memory efficiently.
+
+
+    3. Mark-Sweep
+       The “mark-sweep” term describes the two-phase approach to memory reclamation used by Go’s GC:
+
+       1. Mark phase 
+          During this phase, the garbage collector traverses the object graph, starting from the roots.
+          As described above, it uses the tri-color marking algorithm to discover all reachable objects. 
+          The mark phase operates concurrently with the program, interleaving marking work with 
+          the execution of Goroutines.
+
+        2. Sweep phase
+           Once all reachable objects are marked (black), the sweep phase begins. 
+           During this phase, the garbage collector reclaims the memory occupied by white 
+           (unreachable) objects. This phase also happens concurrently with the execution 
+           of Goroutines, cleaning up a bit of memory at a time.
