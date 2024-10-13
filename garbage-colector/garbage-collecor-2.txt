@@ -1,0 +1,94 @@
+Garbage Collection Algorithm
+    Go’s garbage collector utilizes a tri-color mark-sweep algorithm, a variant of a broader 
+    class of tracing garbage collectors. At the core of this process lies the concept of 
+    ‘marking’ and ‘sweeping’.
+
+
+Tri-color Mark and Sweep Algorithm
+    In the context of garbage collection, ‘marking’ involves traversing the object graph, 
+    starting from the root, and marking every object that can be reached. This action tags 
+    all objects in active use. The ‘sweeping’ phase then goes through all the objects and 
+    reclaims the memory occupied by unmarked objects, which are unreachable and therefore 
+    no longer needed.
+
+
+    The tri-color marking model visualizes the object graph using three colors: white, grey, and black. 
+    At the start of a garbage collection cycle, all objects are marked white, indicating 
+    they are candidates for memory reclamation. The root objects are then colored grey, 
+    denoting that they are active but their descendants (objects they reference) have not 
+    been marked yet. The garbage collector then successively processes grey objects, 
+    marking their descendants grey and turning themselves black. This process continues 
+    until there are no more grey objects, at which point all live (reachable) objects 
+    will be black, and all white objects can be considered garbage and swept away.
+
+
+Write Barriers
+    An integral part of the tri-color mark-sweep algorithm is the concept of a ‘write barrier’. 
+    This is a mechanism that makes sure the properties of the tri-color abstraction are 
+    maintained while the algorithm is in progress. When a pointer that references a white 
+    (not yet processed) object is written to a black (already processed) object, the garbage 
+    collector ensures the white object is marked as grey (preventing it from being prematurely 
+    collected).
+
+    This mechanism is crucial for allowing the garbage collector to run concurrently with 
+    the program. Without it, there might be a race condition where the garbage collector 
+    might end up sweeping an object that has just been referenced by the program, leading 
+    to a catastrophic failure
+
+
+Garbage Collection Pacing
+    To understand Go’s approach to garbage collection, we need to delve into the specifics of 
+    how it decides when to initiate a garbage collection cycle and its strategies for minimizing 
+    the dreaded GC pause time. This decision-making process, known as garbage collection pacing, 
+    involves a delicate balance of various factors.
+
+
+Heap Growth Ratio and the Role of GOGC
+    When the heap size grows beyond a certain ratio compared to the size at the end of the 
+    previous GC cycle, a new cycle gets initiated. This ratio is adjustable through the 
+    GOGC environment variable.
+
+
+    By default, GOGC is set to 100, meaning that when the heap size becomes double the size 
+    it was at the end of the previous cycle, a new GC cycle gets triggered. 
+    If the GOGC value is 200, the heap is allowed to grow to three times its previous 
+    end size before a GC cycle begins. Conversely, a GOGC value of 50 would trigger a 
+    new GC cycle when the heap is 1.5 times its previous end size. As such, you can 
+    manipulate GOGC to control the frequency of GC cycles, trading off between CPU usage 
+    and memory usage.
+
+
+The Art of Minimizing GC Pause Time
+    One of Go’s garbage collector’s main goals is minimizing the ‘stop-the-world’ pauses 
+    — moments when the execution of goroutines halts to let the garbage collector run. 
+    While a complete avoidance of pauses is impossible, the designers of Go’s GC have made 
+    significant strides in reducing their impact on execution flow.
+
+
+    To keep pauses to a minimum, most of the garbage collection work is performed concurrently 
+    with the program’s execution. The work of the garbage collector is divided into four phases: 
+    setup, mark, mark termination, and sweep. Out of these, only the mark termination phase 
+    requires stopping the execution of the program.
+
+    The setup phase is a very short phase that prepares for the mark phase. The mark phase, 
+    which can run concurrently with the program, involves tracing through the heap to identify 
+    reachable objects, starting from the root set.
+
+
+    Mark termination, the phase that requires a pause, serves to complete the marking process. 
+    It ensures that all goroutines are at a GC-safe point, known as a GC safepoint, stops them, 
+    and then drains any remaining grey objects in the worklist and scans the stacks and globals 
+    again to ensure no reachable objects were missed.
+
+    Finally, the sweep phase, which can also run concurrently, reclaims the memory consumed 
+    by unreachable objects, making it available for future allocations.
+
+    By splitting the process into these phases and allowing much of the work to occur 
+    concurrently with the execution of the program, Go’s garbage collector effectively 
+    minimizes pause times, leading to smoother and more predictable performance.
+
+    However, it’s essential to keep in mind that concurrency in the GC doesn’t equate 
+    to parallelism — while GC work can happen concurrently with goroutine execution, 
+    within a single GC cycle, the work isn’t parallelized. The reason is that coordinating 
+    parallel work would add substantial complexity and potentially diminish the benefits 
+    of parallelism
