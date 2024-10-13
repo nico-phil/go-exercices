@@ -1,0 +1,63 @@
+Dedicated Garbage Collection Threads and Work Stealing
+    The Go runtime employs dedicated operating system (OS) threads for garbage collection tasks. 
+    These threads operate independently of the Goroutines managed by the Go scheduler, meaning 
+    they can run garbage collection concurrently with program execution, enhancing the overall 
+    efficiency of the Go runtime. This approach capitalizes on multi-core processors, allowing 
+    for parallel garbage collection.
+
+    Work stealing is a strategy used by the garbage collector to optimize the distribution of 
+    work across multiple processors. In work stealing, idle processors can “steal” tasks from 
+    busy ones, effectively balancing the load across all available processors. This dynamic load 
+    balancing helps Go achieve efficient utilization of computational resources and boosts the 
+    performance of garbage collection. The work stealing algorithm has been designed to minimize c
+    ontention and maximize parallelism, which leads to better CPU cache utilization and overall 
+    hroughput.
+
+    When a GC cycle starts, the Go runtime creates a set of tasks, each representing a section 
+    of the heap that needs to be scanned. These tasks are stored in a global queue.
+    When a processor is free, it pulls a task from this queue and starts executing it. 
+    If another processor finishes its current task and finds the global queue empty, 
+    it attempts to steal a task from another processor’s local queue. This mechanism 
+    continues until all tasks have been completed, leading to the termination of the GC cycle.
+
+    It’s noteworthy that Go’s garbage collector not only balances the work among processors 
+    but also adapts to the workload. The garbage collector tracks the allocation rate and 
+    the time taken to scan the heap. It uses this data to adjust the rate of object allocation, 
+    allowing it to control the frequency and duration of GC cycles.
+
+    This clever use of dedicated garbage collection threads and work stealing contribute 
+    to the minimal GC pause times in Go, one of the garbage collector’s key objectives. 
+    This efficient utilization of resources enhances the overall performance of Go applications, 
+    especially in multi-core, multi-processor environments. The following sections will further
+    explore heap partitioning and other optimizations that contribute to Go’s robust garbage collection mechanism.
+
+Heap Partitioning and Coloring
+    To optimize the garbage collection process and better manage the memory, Go utilizes a 
+    heap partitioning scheme. The heap is divided into several small blocks or spans, and 
+    each span is usually of a particular size class. These spans are the smallest units of 
+    memory that the garbage collector deals with. All objects of a particular size are allocated 
+    from the same span, which reduces fragmentation and increases memory utilization.
+
+    This partitioning scheme makes the garbage collector’s job easier and more efficient. 
+    Since each span consists of objects of the same size, the garbage collector doesn’t need 
+    to traverse the entire heap; it can simply scan the spans containing live objects.
+
+    To further improve the garbage collection process, Go uses a tri-color marking scheme, 
+    which we’ve discussed earlier. To recap, the heap is conceptually divided into three 
+    sets or “colors”:
+
+    White: Objects that have not been visited yet.
+    Grey: Objects that have been visited but whose children have not been visited.
+    Black: Objects that have been visited and whose children have been visited.
+    At the start of the garbage collection cycle, all objects are white. 
+    The garbage collector visits each object, starting from the root, and colors it grey. 
+    Then it visits the children of the grey objects and colors them grey, while the parent 
+    objects are turned black. This process continues until there are no more grey objects, 
+    at which point all reachable objects will be black, and all unreachable objects will 
+    be white. The white objects are then considered garbage and reclaimed by the garbage 
+    collector.
+
+    This mechanism allows the garbage collector to work concurrently with the program execution, 
+    reducing pause times and making the garbage collection process more efficient. 
+    In the next section, we will explore how Go achieves efficient garbage collection 
+    through the concept of write barriers.
