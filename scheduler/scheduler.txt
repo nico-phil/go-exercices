@@ -1,0 +1,52 @@
+https://medium.com/@hatronix/inside-the-go-scheduler-a-step-by-step-look-at-goroutine-management-1a8cbe9d5dbd
+
+
+Inside the Go Scheduler: A Step-by-Step Look at Goroutine Management
+
+Step 1: Creating a New Goroutine
+    The journey begins with the creation of a new goroutine. Goroutines are lightweight 
+    threads of execution in Go and are your primary tool for concurrent programming. 
+    They’re spawned with ease, allowing you to perform tasks in parallel without much effort.
+
+
+Step 2: Managing Goroutines in Queues
+    Now, let’s dive into the details of how goroutines are managed. When a new goroutine is 
+    created, it enters the scheduler. Here’s what happens: If there’s enough space in the local 
+    queue, the goroutine is placed there. Each OS thread (M) has its local queue for goroutines. 
+    If the local queue is full, the goroutine is placed into a global queue. This global queue 
+    is accessible to all OS threads (M), allowing any of them to pull goroutines from it to
+    execute. When a thread is blocked in a system call (for example, during I/O operations), 
+    it doesn’t need to maintain its local run queue. In this case, the scheduler ensures that 
+    these goroutines are executed elsewhere,
+
+
+Step 3: Executing Goroutines on OS Threads
+    This step is all about ensuring that goroutines are executed on the available 
+    OS threads (M): Each goroutine (G) must be executed on an OS thread (M).
+    The relationship between M and P (processors) is one-to-one. If there’s a goroutine 
+    that can be executed in a processor bound by an OS thread (M), it’s pulled from the 
+    processor’s local queue to execute. If a processor (P) is empty and there are no executable
+    goroutines, the OS thread (M) pulls a goroutine from the global queue. If the global 
+    queue is also empty, the scheduler looks to pull goroutines from other processors.
+
+
+Step 4: Allocating Resources
+    Before a goroutine can run, it needs the necessary resources allocated to it. 
+    This includes things like memory and stack space. The scheduler ensures that these resources 
+    are prepared, and the goroutine is ready to roll.
+
+
+Step 5: Execution on the CPU
+    Finally, the CPU is allocated to the goroutine, and it starts executing the function. 
+    The number of processors is determined by the maximum number of GOMAXPROCS, which sets 
+    the limit for parallelism.
+
+
+Step 6. Network Go: Handling Asynchronous System Calls
+    The Go runtime includes a Network Poller component to manage asynchronous system calls, 
+    such as network I/O: When a goroutine is waiting for a network request to complete, 
+    it’s added to the network poller to avoid blocking a kernel thread. If both the global 
+    and local run queues are empty, the processor polls the network. If a runnable goroutine 
+    is found in the network poller, it’s added to the local run queue. In cases where 
+    everything is empty and the network poller is blocked, the processor may randomly 
+    steal work from another processor, including itself.

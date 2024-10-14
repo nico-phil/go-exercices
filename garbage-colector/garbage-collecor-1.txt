@@ -47,7 +47,7 @@ Memory Allocation in Go
 
 
 Go’s Concurrent, Tri-color, Mark-Sweep Garbage Collector
-    Garbase collector in Go adopts a concurrent, tri-color, mark-sweep approach. 
+    Garbage collector in Go adopts a concurrent, tri-color, mark-sweep approach. 
     This design allow Go's GC to be non-disruptive to the application's performance while ensuring
     efficient memory mangement 
 
@@ -60,8 +60,8 @@ Go’s Concurrent, Tri-color, Mark-Sweep Garbage Collector
 
     
     2. Tri-color
-        The "tri-color" term refers to the making algorigthm used by Go's GC, which consider objects
-        (or blocks of memory ) in three different states - whites, grey and black
+        The "tri-color" term refers to the marking algorigthm used by Go's GC, which consider objects
+        (or blocks of memory ) in three different states - white, grey and black
 
         White objects are those the garbage collecor has not processed.
         They may or may not be reachable from the roots (the set of objects directly accessible 
