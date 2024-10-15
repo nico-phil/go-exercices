@@ -1,0 +1,78 @@
+Tuning Garbage Collection in Go
+    The Go runtime attempts to manage the garbage collector (GC) for most applications 
+    efficiently, but there may be situations where specific needs require tuning GC behavior. 
+    These needs may arise from unusual workload patterns, the desire for lower latency, 
+    or constraints on memory consumption.
+
+    The primary tuning mechanism in Go is the GOGC environment variable. GOGC determines 
+    the garbage collector's aggressiveness. The value of GOGC is a percentage that controls 
+    the amount of additional heap memory allocated relative to the live heap size. 
+    If GOGC=100 (the default), Go runtime will trigger a GC cycle when the heap size is 
+    twice the size of the retained heap since the last collection. A lower GOGC value 
+    makes the GC run more frequently, thus reducing the program's memory footprint, 
+    but potentially at the cost of CPU time. Conversely, a higher GOGC value makes the GC 
+    run less frequently, potentially improving CPU performance but increasing memory use.
+
+    Let’s look at some examples:
+
+    GOGC=off: This completely disables the garbage collector. It's not generally recommended 
+    but might be useful in some short-lived utilities or tests.
+
+    GOGC=50: This means the garbage collector will trigger a GC cycle when the heap size is 50% 
+    more than the live heap size after the last collection. It can be useful in memory-constrained 
+    environments but may result in more frequent GC cycles, affecting performance.
+
+    GOGC=200: Here, the GC will run when the heap size is triple the live heap size after the 
+    last collection. This setting may be beneficial in CPU-bound applications, as it reduces 
+    GC frequency, but it also increases memory usage.
+
+    To set the GOGC variable, you can use an environment variable, or you can adjust it 
+    programmatically using the debug package:
+
+    debug.SetGCPercent(200)  // sets GOGC=200
+
+    In addition to GOGC, you can use the runtime package's debug subpackage for more granular 
+    control over the garbage collector. Functions such as debug.FreeOSMemory() and 
+    debug.SetMaxHeap() allow you to trigger garbage collection or set the maximum heap size, 
+    respectively. But these functions should be used with caution because they can easily 
+    disrupt the garbage collector's regular operation and potentially degrade performance.
+
+    The ability to tune Go’s garbage collector allows developers to optimize for specific 
+    conditions. However, it’s always good to profile and understand your application’s behavior
+     before making any adjustments.
+
+    In the next section, we’ll look at the benefits and drawbacks of Go’s garbage collector 
+    to help you gain a more comprehensive understanding of its trade-offs.
+
+
+Object Reachability and GC Termination
+    An essential principle that governs garbage collection in Go is object reachability. 
+    An object in memory is considered reachable if it can be accessed directly or indirectly 
+    by the root of the object graph, usually a global variable or a local variable on the 
+    current call stack. Objects that are not reachable are deemed as garbage and are candidates 
+    for memory deallocation during a GC cycle.
+
+    Go’s garbage collector employs the tri-color marking algorithm, as discussed earlier, 
+    to determine the reachability of objects. At the start of the marking phase, all objects 
+    are initially marked white, signifying they are unmarked. The GC then iteratively scans 
+    the root objects, marking them as grey, meaning they are reachable but their children have 
+    not been examined. The GC will follow pointers from these grey objects, marking them and 
+    their children as grey, until there are no unexamined grey objects left.
+
+    The termination of the garbage collection process is closely linked to object reachability. 
+    The GC cycle ends when all the reachable objects have been examined and marked as black, 
+    indicating they are reachable, and all their children have been marked. The remaining white 
+    objects are unreachable and hence, considered garbage.
+
+    An interesting detail to note is that Go uses a Write Barrier, a mechanism that enforces 
+    specific rules during pointer updates, to maintain the invariant of the tri-color mark 
+    process. It ensures that no black objects point to a white object, preventing the GC from 
+    prematurely considering an object as unreachable when it still has references.
+
+    Understanding this reachability concept and the termination of a GC cycle can be crucial 
+    for efficient memory management in Go. It assists in predicting and controlling GC behavior, 
+    enabling the writing of more efficient and performant Go code. The reachability concept 
+    also holds significant value when troubleshooting memory leaks, where unreachable objects 
+    are unexpectedly retained, causing the application’s memory consumption to continuously 
+    increase over time.
+

@@ -1,0 +1,9 @@
+in Go, strings are stored as two part structure in memory
+
+    1. pointer to the actual string data(which resides in a separate block of memory).
+    2. Length of the string, representing the number of bytes in the string (not necessarily the number of characters).
+
+
+This structure allows strings in Go to be efficiently passed around by reference 
+(since only the pointer and length are passed, not the entire data). However, strings 
+in Go are immutable, meaning once a string is created, it cannot be modified.

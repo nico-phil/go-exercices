@@ -50,3 +50,45 @@ Step 6. Network Go: Handling Asynchronous System Calls
     is found in the network poller, it’s added to the local run queue. In cases where 
     everything is empty and the network poller is blocked, the processor may randomly 
     steal work from another processor, including itself.
+
+
+
+Some specific cases:
+    A. Processor Work Stealing: Load Balancing in Go
+        The Go scheduler employs a clever technique known as work stealing to balance the 
+        load among processor’s kernel threads. Before a processor starts stealing work, 
+        it checks its local run queue. If it’s not empty, the processor grabs a goroutine from 
+        there and executes it. When the local run queue is empty, it then checks the global run 
+        queue but does so only 1/61 of the time to maintain fairness. The stealing process is 
+        designed to be fair, ensuring that each processor steals an equivalent number of 
+        goroutines based on the number of processors. For example, with 3 processors and 6 
+        goroutines in the global run queue, each processor takes 2 goroutines. When a processor 
+        with runnable goroutines is found, it grabs half of them and adds them to its local 
+        run queue, ensuring efficient distribution of work.
+
+
+    B. Handoff: Dealing with Blocking Syscalls
+        What happens when a goroutine, which usually runs on a kernel thread, makes a 
+        blocking syscall? Here’s where the concept of handoff comes into play: If a goroutine 
+        makes a system call, it blocks the kernel thread, potentially starving other goroutines 
+        in the local run queue. To address this, the Go runtime invokes “releasep,” 
+        which disassociates the processor from the blocked kernel thread. The processor is 
+        then assigned a new kernel thread that’s either readily available or created as needed,
+        a process known as handoff. Handoffs can be costly, especially when creating new 
+        kernel threads. Notably, performing a handoff for every syscall may not be optimal, 
+        as some syscalls are short-lived, and the kernel thread may not remain blocked for long.
+
+    C. Optimizing Handoff
+        The Go scheduler is smart about handoffs and optimizes them for efficiency. 
+        Immediate handoff occurs when the runtime knows that a syscall will be blocking 
+        for an extended period, like reading from a socket. In other cases, the processor 
+        remains blocked, but its status is set to indicate it’s in a syscall. The runtime 
+        periodically checks using “Sysmon” if the processor is still in a syscall. If it is, 
+        a handoff is initiated.
+
+    D. Returning from a Handed-Off Syscall
+        When a goroutine returns from a syscall, the scheduler determines how to proceed: If the old 
+        processor (the one that was handed off) is available, the goroutine associates itself with it. 
+        If the old processor is unavailable, the goroutine joins an idle processor. If no idle 
+        processors are available, the goroutine joins the global run queue, with parked goroutines that
+        were in the syscall.
