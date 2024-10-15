@@ -1,0 +1,60 @@
+In Go, the key of a map must be of a comparable type, meaning that the keys can be 
+compared using the == and != operators. This requirement allows Go to efficiently 
+check whether a given key exists in the map and to manage how key-value pairs are 
+tored and retrieved.
+
+
+What It Means for a Type to Be Comparable in a Map Key:
+
+    1. Uniqueness:
+        When you use a key in a map, Go must be able to compare it with other keys to ensure that each key in the map is unique.
+        For example, if you insert two identical keys, only one will be stored because Go checks if the key already exists by comparing it with others.
+    
+    2. Efficient Lookup:
+        hash table internally for maps, and keys are hashed to determine where their 
+        associated values are stored. To check if a key is already present in the map, 
+        Go must be able to compare the keys using == and != after hash collisions.
+
+
+Examples of Comparable Types That Can Be Map Keys:
+
+    1. Basic Types: Booleans, numbers, and strings are comparable and can be used as map keys.
+        m := map[string]int{"apple": 1, "banana": 2}
+        fmt.Println(m["apple"]) // 1
+
+    2. Pointers: Pointers are comparable and can be used as keys, as they can be compared by memory addresses.
+        p1 := new(int)
+        p2 := new(int)
+        m := map[*int]int{p1: 100, p2: 200}
+        fmt.Println(m[p1]) // 100
+
+    3. Arrays: Arrays are comparable (if their elements are comparable), so they can be used as map keys. 
+        Arrays are compared element by element.
+        m := map[[2]int]string{
+            [2]int{1, 2}: "first",
+            [2]int{3, 4}: "second",
+        }
+        fmt.Println(m[[2]int{1, 2}]) // "first"
+    
+    4. Structs: Structs can be used as map keys if all of their fields are of comparable types.
+
+        type Point struct {
+            X, Y int
+        }
+        m := map[Point]string{
+            {1, 2}: "A",
+            {3, 4}: "B",
+        }
+        fmt.Println(m[Point{1, 2}]) // "A"
+
+
+Non-Comparable Types That Cannot Be Map Keys:
+
+
+    1. Slices are not comparable because they are references to arrays, and Go doesn't 
+        allow comparing slice contents directly.
+
+    2. Maps: Maps are not comparable because comparing two maps would require 
+       comparing their entire contents, which Go doesn't support.
+
+    3. Functions: Functions cannot be used as map keys because they are not comparable, except to nil

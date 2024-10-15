@@ -1,0 +1,27 @@
+In Go, recover is a built-in function used in conjunction with panic to handle errors 
+and unexpected conditions in a controlled way. When a panic occurs, the normal execution 
+of the program stops, and the defer statements are executed. If recover is called inside 
+a deferred function, it can stop the panicking sequence and allow the program to continue 
+execution.
+
+
+Key Concepts
+
+    1. Panic:
+        A panic is a built-in function in Go that stops the normal execution of the program 
+        and begins unwinding the stack of function calls, running deferred functions along the way.
+        It's typically used to handle unexpected errors or fatal conditions that cannot 
+        be handled using normal error returns.
+
+    
+    2. Defer:
+        The defer keyword allows you to schedule a function to be executed after the surrounding function returns.
+        Deferred functions are executed in Last In, First Out (LIFO) order, meaning 
+        that the last deferred function will be executed first.
+        
+    3. Recover:
+        The recover function allows you to regain control of a panicking goroutine.
+        It must be called within a deferred function to be effective.
+        recover returns the value passed to panic, or nil if there is no panic in progress.
+
+        exemples in recover.go
