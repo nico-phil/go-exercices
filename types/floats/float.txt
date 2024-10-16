@@ -1,0 +1,68 @@
+https://www.youtube.com/watch?v=CwUcmUkrhDY
+
+In Go, floating-point numbers are stored in memory according to the IEEE 754 standard, 
+which is the most widely used standard for floating-point arithmetic. Go has two main 
+floating-point types: 
+
+    1. float32: 32-bit floating-point number
+
+    2. float64: 64-bit floating-point number (default for floating-point literals)
+
+
+
+1.Float32 and Float64 Representation
+
+    Both `float32` and `float64` use three components to represent a floating-point number:
+
+        1. Sign bit (S): 1 bit that represents whether the number is positive or negative.
+            - `0` means positive.
+            - `1` means negative.
+
+        2. Exponent (E): This part determines the range of the number 
+        (how large or small it can be). The exponent is stored in a biased form (
+            with an offset) to accommodate both positive and negative exponents.
+
+        
+        3. Mantissa (M) or Significand: This part represents the precision of the number.
+            It stores the significant digits of the number in binary format.
+
+
+1. Memory layout for float32:
+    1 bit for sign (S)
+    8 bits for exponent (E) (biased by 127)
+    23 bits for the mantissa (M) (with an implicit leading 1)
+
+
+    Example: float32 breakdown for the number 3.14
+
+        1. Convert the number into binary: `3.14 ≈ 11.0010010000111111011` in binary.
+        2. Normalize it: `1.10010010000111111011 × 2^1`
+        3. The sign is positive (`S = 0`), exponent is `1 + 127 = 128` (`E = 10000000`), 
+        and the mantissa is `10010010000111111011`.
+
+        The 32 bits would look like this in memory: | 0 | 10000000 | 10010010000111111011 |
+
+
+
+2. Memory layout for `float64`**:
+    - 1 bit for sign (S)
+    - 11 bits for exponent (E) (biased by 1023)
+    - 52 bits for the mantissa (M)
+
+    ### Example: `float64` breakdown for the number `3.14`
+
+    The steps for breaking down the number are the same as for `float32`, 
+    but with a larger exponent and mantissa size:
+
+    1. The normalized value is `1.10010010000111111011 × 2^1`.
+    2. The sign is positive (`S = 0`), exponent is `1 + 1023 = 1024` (`E = 10000000000`), 
+    and the mantissa is `10010010000111111011010101000100010000101111011011` (with more precision).
+
+    The 64 bits would look like this in memory: | 0 | 10000000000 | 10010010000111111011010101000100010000101111011011 |
+
+
+### Summary
+    float32: 32-bit floating-point number, stored as sign (1 bit), exponent (8 bits), and mantissa (23 bits).
+    `float64: 64-bit floating-point number, stored as sign (1 bit), exponent (11 bits), and mantissa (52 bits).
+    Go uses the **IEEE 754 standard** for representing floating-point numbers, which includes special values like zero, infinity, and NaN.
+    Precision is limited by the number of bits allocated to the mantissa, while the range is determined by the exponent.
