@@ -1,0 +1,90 @@
+a Go **literal** is an explicit number specified number, character or string.
+
+- Integer literal: sequence of number, base 10 by default
+
+
+1. Types and sizes
+    Go has several integer types, each of which takes a specific amount of memory:
+
+        int8 / int32 -> 1 byte (8 bits)
+        int16 / uint16 -> 2 bytes(16 bits)
+        int32 / uint32 -> 4 bytes(32 bits)
+        int64 / uint64 -> 8 bytes(64 bits)
+        int / uint -> Platform-dependent(typeically 4 bytes on 32 bit-systems, 8 bytes on 64 bit-systems)
+
+
+2. Signed vs. Unsigned Representation
+
+    1. Signed integers (int, int32, int64, etc.): Go uses two's complement representation 
+        to store signed integers.  In this system, the most significant bit (MSB) is used 
+        as the sign bit. If the MSB is 0, the number is positive, and if it's 1, the number 
+        is negative.
+
+        The binary representation of 10 is 00000000 00000000 00000000 00001010.
+        The binary representation of -10 is 11111111 11111111 11111111 11110110.
+
+    
+    2. Unsigned integers (uint, uint32, uint64, etc.): These are non-negative integers, 
+        and all bits are used to store the magnitude of the number. The range of values 
+        that can be represented is larger for unsigned integers compared to signed integers 
+        of the same size.
+
+        For example, in a 4-byte (32-bit) unsigned integer (`uint32`): The binary 
+        representation of `10` is `00000000 00000000 00000000 00001010`.
+
+
+3. Memory Layout
+
+    Endianess: The order in which bytes are stored in memory (big-endian vs little-endian) 
+    depends on the architecture of the system where Go is running. On most modern 
+    architectures, Go stores integers in **little-endian** format, meaning the least 
+    significant byte comes first in memory. This is more of a system-level detail rather 
+    than specific to Go.
+    
+    For example, in a 32-bit little-endian system, the integer 
+    `10` (`00000000 00000000 00000000 00001010` in binary) will be stored in memory as: 0x0A 0x00 0x00 0x00
+
+    In big-endian format, it would be: 0x00 0x00 0x00 0x0A
+
+
+4. Integer Range
+
+    The range of values that can be stored in an integer type depends on its size and 
+    whether it is signed or unsigned:
+
+    For signed integers, the range is from `(2^(n-1))` to `2^(n-1) - 1`, where `n` is the number of bits. For example:
+        - `int8`: -128 to 127
+        - `int32`: -2,147,483,648 to 2,147,483,647
+
+    For unsigned integers, the range is from `0` to `2^n - 1`. For example:
+        - `uint8`: 0 to 255
+        - `uint32`: 0 to 4,294,967,295
+
+
+4. Pointer to Integers
+    When you take the address of an integer variable in Go using the `&` operator, a 
+    pointer to that integer is created. The pointer stores the memory address where the 
+    integer is located. The size of the pointer itself depends on whether Go is running in 
+    a 32-bit or 64-bit environment (4 bytes for 32-bit, 8 bytes for 64-bit).
+
+
+
+5.Arrays and Slices of Integers
+
+    Arrays: An array of integers stores the integers in contiguous memory locations, and 
+    the memory required for the array is simply the size of the integer type multiplied 
+    by the number of elements in the array.
+
+    Slices: Slices are more complex because they consist of three fields: a pointer to 
+    the underlying array, the length of the slice, and the capacity of the slice. 
+    The slice itself is a descriptor, and its elements are stored in an underlying array.
+
+
+### Summary
+
+In Go:
+    - Integers are stored in binary form in memory.
+    - The size of the integer in memory depends on its type (`int8`, `int32`, `int64`, etc.).
+    - Signed integers use two's complement representation, while unsigned integers use a simple binary representation.
+    - Endianness (little-endian on most systems) affects how bytes are ordered in memory.
+    - Slices of integers consist of a pointer to an underlying array, with the length and capacity stored separately.
