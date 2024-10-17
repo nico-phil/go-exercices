@@ -1,0 +1,38 @@
+String Internals:
+
+Q : How are strings stored in Go? Can you explain the structure of a string in terms of 
+    memory layout and how the data is referenced?
+
+Ans:    in Go strings are stored as a struct with 2 field, a pointer to array of byte and 
+        integer that stored the length of the array
+
+        struct {
+            Data *byte
+            Len
+        }
+
+Q: Why are strings immutable in Go? What are the benefits and downsides of this immutability?
+
+Ans: The benefits of immutability:
+        - safety: since once a string is created, it can't be modified, we do not have to worry 
+                    about function or goroutine modify the string when is passed to as parameter
+
+        - Performance : when string is passed to a function, go does not make a copy a the string, it
+                        passed as a pointer.
+
+        - Concurrency: Since string cannot be modified, there safe-thread by default
+
+    Downsides of immutability:
+        - String operations are expensive: Concatenation or other string manipulations may lead to copying, 
+        resulting in performance costs.
+        
+        - Potentially higher memory usage: New strings are created for every modification, 
+        which can lead to more allocations.
+
+
+
+
+Q:  Given the immutability of strings, how does Go handle string concatenation? 
+    Does concatenation involve copying the entire string each time?
+
+ans: any operation that seems to modify a string, sush as concatanation, create a new string
