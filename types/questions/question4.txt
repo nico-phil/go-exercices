@@ -3,8 +3,25 @@ Maps:
 Question 1:  Describe how a map is stored in memory in Go. What internal data structures does 
     Go use to implement maps?
 
-Answer:    maps are implemented in go as hash table using a hash function to compute the key/index
-        where the value is stored
+Answer: In Go, a map is implemented as a hash table. Each key is hashed using 
+        a built-in hash function to determine which "bucket" to place the key-value pair in. 
+        Internally, the map in Go uses buckets to store the data. Each bucket can hold 
+        multiple key-value pairs. A map has:
+
+        Hash function: This function maps keys to specific buckets.
+
+        Buckets: Each bucket contains a list of entries (key-value pairs) and may 
+        also store additional metadata.
+
+        Overflow buckets: When a bucket becomes too full due to hash collisions, 
+        Go allocates "overflow buckets" to handle additional entries.
+
+        The size of the bucket and the number of overflow buckets depends on the size 
+        of the map and how many keys are inserted. Go dynamically resizes the hash table 
+        when the load factor (the number of entries relative to the number of buckets) 
+        becomes too high.
+
+
 
 
 
@@ -12,15 +29,50 @@ Question 2 :   How does Go handle collisions in maps? Can you explain the hashin
             Go maps and how Go resolves hash collisions?
 
 
-Answer: when inserting a new key to map, the hash function compute the key to find in which
-        bucket to insert the value, then compare the values in the bucket with the new 
-        computed value, if there no matched, the value is insert in the bucket
+Answer: Hash collisions occur when two keys hash to the same bucket. Go uses open addressing 
+        with linked buckets to resolve these collisions. 
+        
+        Here's how Go handles collisions: When a key is inserted, Go first hashes the key 
+        to determine which bucket it should go into.
+       
+        If the bucket already contains entries, Go checks the hash and keys of each entry 
+        in the bucket. If the key exists, the value is updated. If it does not exist, 
+        Go appends the new entry to the bucket.
+
+    
+        Overflow buckets are used when the number of keys exceeds the size of the primary 
+        bucket. These are additional linked buckets that store the extra entries.
+
+    
+        Go's hash function spreads the keys evenly across buckets to minimize collisions. 
+        If the map grows too large or too many collisions occur, Go resizes the map by 
+        increasing the number of buckets and rehashing the entries.
 
 
 Question 3: Maps in Go are not safe for concurrent use without explicit synchronization. 
             Why is that, and what would happen if multiple goroutines write to a map at 
             the same time?
 
-Answer: when mutilple goroutine write to map at the same time, there will be a race contidion.
-        we should use mutex like sync.Mutex to lock the map before writing and then unlock it
+Answer: Go maps are not safe for concurrent use because they are not implemented with any 
+        form of built-in synchronization. This means if two goroutines attempt to write 
+        to or read from the same map concurrently without synchronization, it can lead to:
+
+        Race conditions: Where multiple goroutines try to access and modify the same 
+        data at the same time, leading to unpredictable results.
+        
+        Corrupted state: Go's runtime may detect this and panic with an error like 
+        "concurrent map writes." This is because map operations (like resizing or 
+        inserting into buckets) involve multiple steps that need to happen atomically, 
+        but without synchronization, another goroutine could interfere in the middle of an 
+        operation.
+
+
+        To prevent this, Go provides sync.Mutex and sync.RWMutex to lock maps during concurrent access:
+
+        Use sync.Mutex to lock the map during both reads and writes.
+        Use sync.RWMutex if you want to allow concurrent reads but prevent concurrent writes.
+        Alternatively, you can use Go's concurrent map package, sync.Map, which is safe 
+        for concurrent use but operates differently from regular maps.
+
+
 
