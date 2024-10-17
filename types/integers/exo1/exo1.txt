@@ -1,0 +1,44 @@
+Basic Type Memory Layout:
+
+
+Question :  How is an int type stored in memory in Go? Does the size of the int type vary 
+            between platforms? If so, how?
+
+Answer:  'int' type is stored in binary. the size of int depends on the platform where go is
+         running. 32 bits for 32bits system and 64 bits for 64bits system
+
+
+
+Question:   Explain how the float64 type is stored in memory. How does Go represent 
+            floating-point numbers internally?
+
+Answer:     float64 type is stored in memory as Three value : 
+                - S(Sign) : sign of the number, 0-> positive, 1->negative
+                - E(Exponent): the range of the number, means that the number before the point
+                - Mantissa(M) or Significant : the precision of the number, means that the value 
+                                               after the points
+                
+            float64 uses: 1 bit for the sign, 11 bits for the Exponent, 52 for the Mantissa
+
+            for exemple: 20.45 
+                binary representation: 1 0100.0111 0011 0011 0011 0011 0011
+                Normalisation: 1.0100 0111 0011 0011 0011 0011 0011 * 2 ^ 4
+                Exponent = 1023 + 4 = 1027 = 10000000011
+                Mantissa: 0100 0111 0011 0011 0011 0011 0011
+                
+                result: | 0 | 10000000011 | 0100 0111 0011 0011 0011 0011 0011 |
+
+
+Question:   What is the difference between int and uint in terms of memory representation? 
+            How does Go handle signed vs. unsigned integers in memory?
+
+
+Answer :    Signed integers use two's complement representation, which reserves the leftmost 
+            bit for indicating the sign. In contrast, unsigned integers (uint) are stored in binary 
+            without the sign bit, giving them a larger range of positive values.
+
+
+         
+
+
+
