@@ -1,0 +1,26 @@
+Maps:
+
+Question 1:  Describe how a map is stored in memory in Go. What internal data structures does 
+    Go use to implement maps?
+
+Answer:    maps are implemented in go as hash table using a hash function to compute the key/index
+        where the value is stored
+
+
+
+Question 2 :   How does Go handle collisions in maps? Can you explain the hashing mechanism behind 
+            Go maps and how Go resolves hash collisions?
+
+
+Answer: when inserting a new key to map, the hash function compute the key to find in which
+        bucket to insert the value, then compare the values in the bucket with the new 
+        computed value, if there no matched, the value is insert in the bucket
+
+
+Question 3: Maps in Go are not safe for concurrent use without explicit synchronization. 
+            Why is that, and what would happen if multiple goroutines write to a map at 
+            the same time?
+
+Answer: when mutilple goroutine write to map at the same time, there will be a race contidion.
+        we should use mutex like sync.Mutex to lock the map before writing and then unlock it
+
