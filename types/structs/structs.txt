@@ -1,0 +1,135 @@
+In Go, a struct is a composite data type that groups together variables under one name. 
+The way Go stores structs in memory is highly efficient and follows the rules of memory 
+alignment to ensure optimal performance. Here’s a detailed breakdown of how structs are 
+stored in memory:
+
+1. Memory Layout of Structs
+    A Go struct is stored as a contiguous block of memory. Each field in the struct is 
+    allocated memory in the order they are defined. For example:
+
+    type Person struct {
+        Age    int
+        Height float64
+        Active bool
+    }
+
+    In memory, the struct Person will be stored like this:
+
+        Age (4 or 8 bytes depending on the platform)
+        Height (8 bytes)
+        Active (1 byte)
+
+    However, it’s important to note that Go will apply padding between fields to 
+    ensure proper memory alignment.
+
+
+
+2.  Memory Alignment and Padding
+
+    Memory alignment means that fields are placed at specific addresses in memory to 
+    match the system’s word size (usually 4 or 8 bytes). This ensures faster access since 
+    modern processors can fetch aligned memory addresses more efficiently.
+
+
+    Without alignment, Active would be misaligned after Height, which would negatively 
+    affect performance. Go automatically inserts padding bytes between fields to ensure 
+    proper alignment.
+
+    So in memory, the layout might look like this on a 64-bit system:
+    [ Age (8 bytes) ][ Height (8 bytes) ][ Active (1 byte) ][ Padding (7 bytes) ]
+
+    This padding ensures that every field starts at the right memory boundary.
+
+
+3. Memory Layout Optimization
+
+    The order in which fields are defined in a struct can impact the memory footprint 
+    due to alignment and padding. For example:
+
+        type Example1 struct {
+            A int64
+            B bool
+            C int32
+        }
+
+
+        A (int64) is 8 bytes.
+        B (bool) is 1 byte, but since it follows an 8-byte field (A), Go will add 7 bytes of padding after B to maintain alignment for C.
+        C (int32) is 4 bytes.
+        
+        So, the actual memory layout is: [A (8 bytes)][B (1 byte)][Padding (7 bytes)][C (4 bytes)]
+        
+        Thus, the total size is 8 (A) + 1 (B) + 7 (padding) + 4 (C) = 20 bytes.
+
+
+
+    Now, if you rearrange the fields like this:
+
+        type Example2 struct {
+            A int64  // 8 bytes
+            C int32  // 4 bytes
+            B bool   // 1 byte
+        }
+
+        Here, C is better placed after A since C only needs 4 bytes. After C, B (1 byte) 
+        can fit without requiring 7 bytes of padding. However, 3 bytes of padding are 
+        still needed after B to align to an 8-byte boundary.
+
+        So the memory layout becomes: [A (8 bytes)][C (4 bytes)][B (1 byte)][Padding (3 bytes)]
+
+        The total size is 8 (A) + 4 (C) + 1 (B) + 3 (padding) = 16 bytes.
+
+
+4. Structs with Pointers
+    If a struct contains pointers, the pointer itself is stored in the struct, but 
+    the data it points to is stored elsewhere in the heap. For example:
+
+            type Node struct {
+                Value int
+                Next  *Node
+            }
+    Here, Next is a pointer that takes 8 bytes on a 64-bit system, and the memory 
+    for the next Node struct is allocated on the heap
+
+
+5. Embedded Structs
+    mbeds another struct, Go lays out the embedded struct fields inline in the memory 
+    of the parent struct. This ensures that embedded fields are stored in contiguous memory 
+    just like normal fields.
+
+            type Address struct {
+                City  string
+                Zip   int
+            }
+
+            type Person struct {
+                Name    string
+                Age     int
+                Address // Embedded struct
+            }
+
+    In memory, the Address fields (City and Zip) are stored inline with the Person struct.
+
+
+
+6. Zero Values
+    When a struct is created, all its fields are initialized to their zero values. 
+    This means the memory for the struct is allocated, and fields are set to:
+
+    0 for numeric types.
+    "" for strings.
+    nil for pointers, slices, maps, and interfaces.
+
+
+Summary
+    Structs in Go are stored as contiguous blocks of memory.
+
+    Fields in structs are stored in the order they are declared.
+
+    Go inserts padding between fields to maintain memory alignment.
+
+    Memory alignment ensures faster access to fields, and padding bytes minimize misalignment penalties.
+
+    Struct memory layout can be optimized by rearranging fields to minimize padding.
+    
+    Pointers in structs store references to data allocated on the heap, while the pointer itself is stored within the struct.
