@@ -1,0 +1,10 @@
+Slices:
+
+Q:  Explain the internal structure of a slice in Go. What fields make up a slice's header, 
+    and how do they interact with memory allocation?
+
+Ans: struct in go is implemented as struct with three field: a pointer to the 
+    underline array, a length, and a capacity. when we create a slice, go create a underline
+    array to store and the slice
+
+
