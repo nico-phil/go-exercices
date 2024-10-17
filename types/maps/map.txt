@@ -29,7 +29,11 @@ Memory Structure of Maps in Go:
 
 
     4. Load Factor and Resizing:
-        Maps in Go are designed to maintain efficient performance by keeping the number of elements per bucket relatively small. When the number of key-value pairs increases and exceeds the optimal load factor, Go triggers a rehashing process. This involves doubling the number of buckets and redistributing the existing key-value pairs across the new buckets.
+        Maps in Go are designed to maintain efficient performance by keeping the number 
+        of elements per bucket relatively small. 
+        When the number of key-value pairs increases and exceeds the optimal load factor, 
+        Go triggers a rehashing process. This involves doubling the number of buckets and 
+        redistributing the existing key-value pairs across the new buckets.
         
     
     5. Pointers and Indirection:
@@ -52,6 +56,85 @@ Memory Layout
         Overflow handling: When buckets overflow, the map uses linked lists of overflow buckets. 
         Over time, if the map grows, it will resize and rehash the keys to distribute them across 
         a larger number of buckets.
+
+example:
+
+    m := make(map[string]string)
+    Internally a structure called map header is created and the variable m 
+    receives a pointer to this structure, the map header contains all the meta 
+    information about the map, like: 
+        
+        - The number of entries that are currently in the map
+        - The number of buckets in a map is always equal to power of two hence the log(buckets) stored to keep the value small
+        - Pointer to the bucket array that is stored in contiguous memory location,
+        - Hash seed which is random to create each map differently
+
+
+
+What happens when we insert a new value in the map
+
+    m[“green”] = “#00ff00” 
+
+    Hash function is called and a hash code is generated for the given key, based on a part 
+    of the hash code a bucket is determined to store the key value pair. Once the bucket 
+    is selected the entry needs to be stored in that bucket. The complete hash code of the 
+    incoming key is compared with all the hashes from the initial array of hash codes i.e 
+    h1, h2, h3…. if no hash code matches that means this is a new entry. Now if the bucket 
+    contains an empty slot then the new entry is stored at the end of the list of key value 
+    pairs, else a new bucket is created and the entry is stored in the new bucket and the 
+    overflow pointer of old bucket points to this new bucket.
+
+
+Map Iteration
+    Map iterator in golang is random. If you print the same map multiple times you can 
+    see that each output will be different.
+
+
+What happens when map grows
+    Every time the number of elements in a bucket reaches a certain limit, i.e the load 
+    factor which is 6.5, the map will grow in size by doubling the number of buckets. 
+    This is done by creating a new bucket array consisting of twice the number of buckets 
+    than the old array, and then copying all the buckets from old to new array but this is 
+    done very efficiently over time and not at once. During this the map maintains a pointer 
+    to the old bucket which is stored at the end of the new bucket array.
+
+
+
+What happens when we delete an entry from the map
+     golang only grow in size. Even if we delete all the entries from the map, 
+     the number of buckets will remain the same
+
+
+
+
+Go Map Key Characteristics:
+    Keys and Values: Stored together in the buckets. Go supports a variety of key types, 
+    such as strings, integers, and structs (as long as they are comparable).
+
+    Pointer-based: Since Go maps are pointer-based, when you pass a map to a function, 
+    only a reference to the map is passed, not a copy.
+
+    Non-deterministic order: Map iteration order in Go is randomized for security reasons, 
+    so maps do not guarantee a consistent order of elements.
+
+
+
+Key Features of Go Maps:
+    Fast lookups and insertions due to efficient hashing.
+
+    Automatic resizing ensures performance does not degrade as the map grows.
+
+    Garbage Collection: Maps are garbage collected. If a map is no longer referenced, 
+    Go's garbage collector will free the memory.
+
+
+Performance Considerations:
+    Memory usage: Go maps may use more memory than other data structures due to the 
+    overhead from buckets and overflow management.
+
+    Speed: Maps provide average O(1) time complexity for lookups, insertions, 
+    and deletions, but performance can degrade if there are too many hash collisions 
+    or if the map isn't properly sized.
 
 
 you cannot use the copy function to copy a map in Go. The copy function is designed 
