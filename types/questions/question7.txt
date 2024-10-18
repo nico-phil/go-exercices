@@ -25,16 +25,21 @@ Question:   Explain how Go prevents dangling pointers or pointer arithmetic issu
 Answer: Go prevents issues like dangling pointers and pointer arithmetic 
         (common in languages like C) through:
 
-    Garbage Collection: Go has an automatic garbage collector that reclaims memory that 
-    is no longer reachable or in use. This prevents the issue of dangling pointers—where 
-    a pointer points to memory that has been freed.
+        Garbage Collection: Go has an automatic garbage collector that reclaims memory that 
+        is no longer reachable or in use. This prevents the issue of dangling pointers—where 
+        a pointer points to memory that has been freed.
 
-    No Pointer Arithmetic: Unlike C, Go does not allow arbitrary pointer arithmetic. 
-    This means you cannot manually manipulate pointers to move around memory blocks, which 
-    helps avoid common memory corruption errors.
+        No Pointer Arithmetic: Unlike C, Go does not allow arbitrary pointer arithmetic. 
+        This means you cannot manually manipulate pointers to move around memory blocks, which 
+        helps avoid common memory corruption errors.
 
-    Safe Pointers: In Go, when a pointer variable is declared but not assigned, it defaults 
-    to a nil value. Accessing a nil pointer triggers a runtime panic, making errors easier 
-    to detect early on.
+        Safe Pointers: In Go, when a pointer variable is declared but not assigned, it defaults 
+        to a nil value. Accessing a nil pointer triggers a runtime panic, making errors easier 
+        to detect early on.
+
+
+        Overall, Go’s memory management system, combined with its limitations on pointer 
+        manipulation, reduces the risks associated with manual memory management that exist 
+        in lower-level languages.
 
 
