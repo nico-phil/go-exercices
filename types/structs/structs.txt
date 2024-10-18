@@ -122,6 +122,7 @@ stored in memory:
 
 
 Summary
+
     Structs in Go are stored as contiguous blocks of memory.
 
     Fields in structs are stored in the order they are declared.
@@ -131,5 +132,5 @@ Summary
     Memory alignment ensures faster access to fields, and padding bytes minimize misalignment penalties.
 
     Struct memory layout can be optimized by rearranging fields to minimize padding.
-    
+
     Pointers in structs store references to data allocated on the heap, while the pointer itself is stored within the struct.
