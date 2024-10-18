@@ -44,6 +44,7 @@ look like this:
 Example: var x interface{} = 42
 
     The type information points to int (since 42 is an int).
+    The value data contains the integer 42 directly, because integers fit within a word.
 
 
 

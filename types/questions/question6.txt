@@ -1,0 +1,62 @@
+Interfaces:
+
+Question: Can you explain how interfaces are represented in memory? What is an interface{} type, 
+    and how is the dynamic type information stored?
+
+
+Answer: Interfaces in Go are represented in memory as a two-word structure:
+
+        First word: A pointer to the type information, which includes the type of the 
+        underlying value that implements the interface.
+        
+        Second word: A pointer to the value data (either the value itself for smaller types 
+        or a pointer to the actual data for larger types).
+
+        For example, if you have a variable of type interface{} holding an integer value 42,
+        the memory structure would have: 
+            A pointer to the int type.
+            The integer value 42 stored directly (because integers are small enough to fit in 
+            a single word).
+
+            If the interface holds a more complex type, such as a struct, the second word 
+            would contain a pointer to the memory location of that struct rather than the 
+            data itself.
+
+
+
+
+Question:   How does Go handle type assertions and type switches internally? What 
+            happens when you assert a type from an interface{}?
+
+Answer: When performing a type assertion in Go, the runtime checks the type information 
+        stored in the interface's first word. The assertion attempts to match this type 
+        with the asserted type.
+
+        If the types match, the second word (the value data) is returned and cast to the 
+        asserted type.
+
+        If the types do not match, a runtime panic occurs (unless the type assertion is used 
+        in a safe form with the comma-ok idiom, e.g., value, ok := i.(T)).
+        
+        For example, in the code:
+
+            var i interface{} = 42
+            value, ok := i.(int)
+
+            The Go runtime checks if the type information in the first word is int. 
+            Since it is, the integer value stored in the second word is returned.
+
+
+
+        In a type switch, Go sequentially compares the type information in the interface 
+        against each case. The type switch:
+
+            switch v := i.(type) {
+            case int:
+                // Handle int
+            case string:
+                // Handle string
+            }
+
+        Checks the type information in the first word of the interface and matches it 
+        to the corresponding case.
