@@ -1,0 +1,70 @@
+Here’s a simple, step-by-step guide to how the Go scheduler works:
+
+1. Goroutines:
+    Goroutines are lightweight threads managed by Go’s runtime. You can think of them like functions 
+    running in the background, concurrently.
+
+
+2. Go Scheduler’s Purpose:
+    The Go scheduler’s job is to manage and distribute the execution of goroutines across CPU cores 
+    efficiently.
+
+
+
+3. P, M, and G Model:
+    G (Goroutines): Represents the actual goroutines, which are the tasks that need to be executed.
+
+    M (Machine): Represents the worker threads that run goroutines. These are like CPU cores that 
+    physically execute tasks.
+    
+    P (Processor): Manages the resources (like stacks, memory, etc.) needed to run a goroutine on an M
+
+    So the relationship is: Each P can run M (threads), and each M runs G (goroutines).
+
+
+4. How Scheduling Works:
+    There are N goroutines to be executed. Each P can handle goroutines, but only one M can run on a 
+    P at a time.
+
+    P holds a list (called a run queue) of goroutines that are ready to run.
+
+    M picks a goroutine from P’s run queue and executes it.
+
+
+5. Work Stealing:
+    If one P finishes its tasks (its run queue is empty), it can “steal” work (goroutines) from 
+    another P that has more tasks.
+
+
+6. Preemptive Scheduling:
+    Go scheduler uses preemption to avoid one goroutine hogging all the CPU. After a goroutine 
+    runs for a certain amount of time, it is paused (preempted) to give others a chance 
+    to run
+
+7. Blocking Goroutines:
+    If a goroutine blocks (e.g., it’s waiting for I/O), the Go scheduler will park it and move the 
+    M to another runnable goroutine, maximizing CPU utilization.
+
+
+8. System Calls:
+    If a goroutine makes a system call (like accessing the disk), the M gets blocked. The scheduler 
+    then spins up another M to keep the CPU busy and reduce idle time.
+
+9. Goroutine Scheduling Cycle:
+    New goroutines are created and added to the P’s run queue.
+    M picks a G from the P’s queue and runs it.
+    If the G finishes or gets blocked, M looks for another G in the queue.
+    If there are no more G in the queue, M might help other P’s or take a rest.
+
+
+10. GOMAXPROCS:
+    This setting controls the number of P (logical processors) that can run simultaneously. 
+    By default, it’s set to the number of CPU cores, but it can be adjusted for performance.
+
+
+Simplified Flow:
+    You create goroutines (tasks).
+    The Go runtime creates P, M, and G to handle them.
+    P assigns M to run G (tasks).
+    M executes G, and if one M is done, it helps another P that has pending G.
+    Preemption and work stealing help balance and maximize CPU use

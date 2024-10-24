@@ -1,7 +1,7 @@
 In Go, the key of a map must be of a comparable type, meaning that the keys can be 
 compared using the == and != operators. This requirement allows Go to efficiently 
 check whether a given key exists in the map and to manage how key-value pairs are 
-tored and retrieved.
+stored and retrieved.
 
 
 What It Means for a Type to Be Comparable in a Map Key:

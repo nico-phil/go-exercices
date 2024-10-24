@@ -20,7 +20,7 @@ type string struct {
 
 2. Length
     The second part of the string structure is the length, which is an int representing 
-    the number of bytes in the string.Since Go strings are UTF-8 encoded, a single character 
+    the number of bytes in the string. Since Go strings are UTF-8 encoded, a single character 
     (rune) can take up multiple bytes. Therefore, the length may not represent the number 
     of characters, but rather the number of bytes used to encode the string.
 
