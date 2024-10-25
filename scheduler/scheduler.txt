@@ -17,7 +17,7 @@ Step 2: Managing Goroutines in Queues
     is accessible to all OS threads (M), allowing any of them to pull goroutines from it to
     execute. When a thread is blocked in a system call (for example, during I/O operations), 
     it doesn’t need to maintain its local run queue. In this case, the scheduler ensures that 
-    these goroutines are executed elsewhere,
+    these goroutines are executed elsewhere, maintaining system responsiveness
 
 
 Step 3: Executing Goroutines on OS Threads

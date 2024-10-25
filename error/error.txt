@@ -1,0 +1,28 @@
+Errors
+
+type error interface {
+    Error() string
+}
+
+Any type that implements this interface consider to be an error. The reason you return nil from 
+a function to indicate that no error accured is that nil is the zero value for any interface
+
+- Basics error :
+    err := errors.New("this is an error")
+
+    err := fmt.Errorf("this also an error)
+
+    func HandlerErr()(int, error){
+        return 0, errors.New("error from the function")
+    }
+
+
+- Sentinel errors
+    Sentinel errors are used to indicate that you cannot start or continue processing
+
+    var ErrNotFound = errors.New("record not found")
+
+
+- Define your own error
+
+
