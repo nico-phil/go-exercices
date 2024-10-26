@@ -1,0 +1,13 @@
+Goroutines
+
+-   goroutine are  ligth-weight thread manage by the go runtime
+
+-   goroutine creation is faster than thread creation, because you are not creating operating system-level
+    resourses
+
+-   Goroutine initial stack sizes are smaller than thread stack sizes and can grow as needed. This make
+    gorutine more memory efficient
+
+-   switching between goroutines are faster than switching between thread because it happens intirely 
+    within the process, avoiding operation system calls that are relatively slow
+

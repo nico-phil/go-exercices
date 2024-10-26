@@ -25,4 +25,26 @@ a function to indicate that no error accured is that nil is the zero value for a
 
 - Define your own error
 
+    type StatusErr struct {
+        Status int
+        Message string
+    }
 
+    func(se *StatusErr) Error() {
+        return se.Message
+    }
+
+    ex in own-error.go
+
+    When you using custom errors, never define a variable to be of the type of your custom error.
+    Either explicitly return nil when no error occurs or define the variable to be type error
+
+
+- Wrapping errors
+    f, err := os.Open(name)
+    if err != nil {
+        fmt.Errorf("there is an error %w", err)
+    }
+
+
+- errors.Is and errors.As

@@ -1,20 +1,14 @@
 package main
 
-import (
-	"archive/zip"
-	"bytes"
-	"fmt"
-)
+import "fmt"
 
 func main(){
-	data := []byte("this is not a zip file")
-	notZipfile := bytes.NewReader(data)
-
-	_, err := zip.NewReader(notZipfile, int64(len(data)))
+	data, err := LoginAndGetData("12345nico", "4444", "data.txt")
 	if err != nil {
-		if err == zip.ErrFormat {
-			fmt.Println("told you")
-		}
+		fmt.Println("error in main:", err)
+		return
 	}
+
+	fmt.Println("data", string(data))
 
 }

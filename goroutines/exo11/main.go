@@ -10,7 +10,7 @@ func main(){
 	const numWorkers = 3
 	const numTasks =  15
 
-	tasks := make(chan int)
+	tasks := make(chan int, numWorkers)
 
 	var wg sync.WaitGroup
 
