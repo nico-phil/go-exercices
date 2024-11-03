@@ -11,7 +11,7 @@ func main() {
 	y := a[2:] //  y = []int{2, 3}
 	fmt.Println("y", y, len(y), cap(y))
 
-	x = append(x, y...) // x =[]int{0, 2,3}
+	x = append(x, y...) // x =[]int{0, 2,3} 
 
 	x = append(x, y...)  // x = []int{0,2,3,2,3}
 	
