@@ -13,6 +13,12 @@ func ModifyMap(m map[string]int){
 	}
 }
 
+func ModifyMap1(m map[string]int){
+	for k, v := range m {
+		m[k] = v * 5
+ 	}
+}
+
 
 func update(m map[string]int,  key string, v *int){
 		if _, ok := m[key]; !ok {
@@ -27,16 +33,9 @@ func main(){
 		"two": 2,
 		"three": 3,
 	}
-	
-	v := 4
-	
 	fmt.Println("before", m)
+	ModifyMap(m)
 
-
-	update(m, "four", &v)
-
-	// ModifyMap(m)
-
-	fmt.Println("after", m)
+	fmt.Println("After", m)
 }
 

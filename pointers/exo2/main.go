@@ -4,10 +4,14 @@ import "fmt"
 
 func main(){
 	nums := [5]int{1,2,3,4,5}
-	nums2 := [5]int{1,2,3,4,4}
-	r := compare(&nums, &nums2)
+	// nums2 := [5]int{1,2,3,4,4}
+	// r := compare(&nums, &nums2)
 
-	fmt.Println(r)
+	fmt.Println("Before",nums)
+	
+	modify(&nums)
+
+	fmt.Println("",nums)
 	
 }
 
