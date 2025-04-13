@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"hash/maphash"
+)
 
 
 type Comp struct {
@@ -12,15 +15,27 @@ type CompI interface {
 	int
 }
 
+type Square struct {
+	x int
+	y string
+}
+
 func main(){
 	
-	 m := map[int]int{}
-	 modifyMap(m)
+	//  m := map[int]int{}
+	//  modifyMap(m)
 
-	 fmt.Println(m)
+	//  fmt.Println(m)
+
+	//  n := map[Square]int{}
+	//  fmt.Println(n) 
+
+	var h maphash.Hash
+	h.WriteString("hello")
+	fmt.Printf("%d\n",  h.Sum64())
 
 }
 
 func modifyMap(m map[int]int) {
-	m[100] = 100
+	m[100] = 148888
  }
